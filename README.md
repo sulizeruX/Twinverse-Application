@@ -123,5 +123,3 @@ Response
 - Multi‑turn chat: maintain a short conversation history and include it in contents.
 - Fine‑tune temperature and maxOutputTokens in generationConfig for different tone/length.
 
-## License
-Internal/Project use. Add a LICENSE file if you plan to open source.
