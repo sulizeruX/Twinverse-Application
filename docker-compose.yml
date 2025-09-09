@@ -1,0 +1,125 @@
+services:
+  # React Frontend Application
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_SIMULATED_API_URL=http://localhost:8007
+      - REACT_APP_MOVABLE_API_URL=http://movable-api:8000
+      - REACT_APP_INVENTORY_API_URL=http://localhost:8002
+      - REACT_APP_BACKEND_API_URL=http://localhost:9000
+      - REACT_APP_WHATSAPP_API_URL=http://localhost:3001
+    depends_on:
+      - simulated-api
+      - movable-api
+      - inventory-api
+      - backend-api
+      - whatsapp-server
+    networks:
+      - app-network
+
+  # SimulatedAPI on port 8007
+  simulated-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.simulated
+    ports:
+      - "8007:8007"
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MovableAPI on port 8000
+  movable-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.movable
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # InventoryAPI on port 8002
+  inventory-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.inventory
+    ports:
+      - "8002:8002"
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Backend API on port 9000
+  backend-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-AIzaSyD25e3bN9dyssrR17NE_yWVj1bbWI0F8Y8}
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # WhatsApp Notification Server on port 3001
+  whatsapp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.whatsapp
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./whatsapp-server/whatsapp-session:/app/whatsapp-session
+    networks:
+      - app-network
+    stdin_open: true  # Keep STDIN open for interactive mode
+    tty: true         # Allocate a pseudo-TTY for QR code display
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  node_modules:
