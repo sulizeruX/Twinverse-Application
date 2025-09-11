@@ -1,6 +1,7 @@
 services:
   # React Frontend Application
   frontend:
+    image: tsiyabi/twinverse-frontend:latest
     build:
       context: .
       dockerfile: Dockerfile.frontend
@@ -24,6 +25,7 @@ services:
 
   # SimulatedAPI on port 8007
   simulated-api:
+    image: tsiyabi/twinverse-simulated-api:latest
     build:
       context: .
       dockerfile: Dockerfile.simulated
@@ -42,6 +44,7 @@ services:
 
   # MovableAPI on port 8000
   movable-api:
+    image: tsiyabi/twinverse-movable-api:latest
     build:
       context: .
       dockerfile: Dockerfile.movable
@@ -60,6 +63,7 @@ services:
 
   # InventoryAPI on port 8002
   inventory-api:
+    image: tsiyabi/twinverse-inventory-api:latest
     build:
       context: .
       dockerfile: Dockerfile.inventory
@@ -78,6 +82,7 @@ services:
 
   # Backend API on port 9000
   backend-api:
+    image: tsiyabi/twinverse-backend-api:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -85,7 +90,7 @@ services:
       - "9000:9000"
     environment:
       - PYTHONUNBUFFERED=1
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-AIzaSyD25e3bN9dyssrR17NE_yWVj1bbWI0F8Y8}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     networks:
       - app-network
     healthcheck:
@@ -97,6 +102,7 @@ services:
 
   # WhatsApp Notification Server on port 3001
   whatsapp-server:
+    image: tsiyabi/twinverse-whatsapp-server:latest
     build:
       context: .
       dockerfile: Dockerfile.whatsapp
