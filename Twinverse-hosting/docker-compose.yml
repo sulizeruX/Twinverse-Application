@@ -1,11 +1,7 @@
-version: '3.8'
-
 volumes:
   whatsapp_data:
   api_logs:
-
 services:
-  # React Frontend Application
   frontend:
     image: tsiyabi/twinverse-frontend:${IMAGE_TAG:-latest}
     restart: always
@@ -18,6 +14,7 @@ services:
       - REACT_APP_INVENTORY_API_URL=http://${HOST_ADDRESS:-localhost}:8002
       - REACT_APP_BACKEND_API_URL=http://${HOST_ADDRESS:-localhost}:9000
       - REACT_APP_WHATSAPP_API_URL=http://${HOST_ADDRESS:-localhost}:3001
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       simulated-api:
         condition: service_healthy
@@ -31,8 +28,6 @@ services:
         condition: service_healthy
     networks:
       - twinverse-network
-
-  # SimulatedAPI
   simulated-api:
     image: tsiyabi/twinverse-simulated-api:${IMAGE_TAG:-latest}
     restart: always
@@ -48,8 +43,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # MovableAPI
   movable-api:
     image: tsiyabi/twinverse-movable-api:${IMAGE_TAG:-latest}
     restart: always
@@ -65,8 +58,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # InventoryAPI
   inventory-api:
     image: tsiyabi/twinverse-inventory-api:${IMAGE_TAG:-latest}
     restart: always
@@ -82,13 +73,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # Backend API with Gemini Integration
   backend-api:
-    image: tsiyabi/twinverse-backend:${IMAGE_TAG:-latest}
+    image: tsiyabi/twinverse-backend-api:${IMAGE_TAG:-latest}
     restart: always
-    ports:
-      - "${BACKEND_API_PORT:-9000}:9000"
+    # Removed ports section - only accessible through nginx
     environment:
       - PYTHONUNBUFFERED=1
       - GEMINI_API_KEY=${GEMINI_API_KEY}
@@ -102,10 +90,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # WhatsApp Notification Server
   whatsapp-server:
-    image: tsiyabi/twinverse-whatsapp:${IMAGE_TAG:-latest}
+    image: tsiyabi/twinverse-whatsapp-server:${IMAGE_TAG:-latest}
     restart: always
     ports:
       - "${WHATSAPP_PORT:-3001}:3001"
@@ -121,7 +107,20 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
+  nginx:
+    image: nginx:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "8080:80"
+      - "9000:9000"  # Only proxy backend-api
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - frontend
+      - backend-api
+    networks:
+      - twinverse-network
 networks:
   twinverse-network:
     driver: bridge
