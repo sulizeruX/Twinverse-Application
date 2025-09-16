@@ -1,7 +1,7 @@
 services:
   # React Frontend Application
   frontend:
-    image: tsiyabi/twinverse-frontend:latest
+    image: ${DOCKERHUB_USERNAME}/twinverse-frontend:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile.frontend
@@ -25,7 +25,7 @@ services:
 
   # SimulatedAPI on port 8007
   simulated-api:
-    image: tsiyabi/twinverse-simulated-api:latest
+    image: ${DOCKERHUB_USERNAME}/twinverse-simulated-api:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile.simulated
@@ -44,7 +44,7 @@ services:
 
   # MovableAPI on port 8000
   movable-api:
-    image: tsiyabi/twinverse-movable-api:latest
+    image: ${DOCKERHUB_USERNAME}/twinverse-movable-api:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile.movable
@@ -63,7 +63,7 @@ services:
 
   # InventoryAPI on port 8002
   inventory-api:
-    image: tsiyabi/twinverse-inventory-api:latest
+    image: ${DOCKERHUB_USERNAME}/twinverse-inventory-api:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile.inventory
@@ -82,7 +82,7 @@ services:
 
   # Backend API on port 9000
   backend-api:
-    image: tsiyabi/twinverse-backend-api:latest
+    image: ${DOCKERHUB_USERNAME}/twinverse-backend-api:${IMAGE_TAG:-latest}
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -102,7 +102,7 @@ services:
 
   # WhatsApp Notification Server on port 3001
   whatsapp-server:
-    image: tsiyabi/twinverse-whatsapp-server:latest
+    image: ${DOCKERHUB_USERNAME}/twinverse-whatsapp-server:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile.whatsapp
@@ -114,8 +114,8 @@ services:
       - ./whatsapp-server/whatsapp-session:/app/whatsapp-session
     networks:
       - app-network
-    stdin_open: true  # Keep STDIN open for interactive mode
-    tty: true         # Allocate a pseudo-TTY for QR code display
+    stdin_open: true
+    tty: true
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 30s
